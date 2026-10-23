@@ -10,7 +10,8 @@ import { blake2b } from "./blake2b.js";
 import * as NC from "./notecrypt.js";
 
 export const P = P2.P;
-export const DEPTH = 16;
+export const DEPTH = 16;        // the note tree
+export const NULL_DEPTH = 16;   // the indexed nullifier tree
 const c = globalThis.crypto;
 const enc = new TextEncoder();
 export const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
@@ -45,11 +46,12 @@ export const nullifier = (nh, sk) => H(nh, sk);
 export const randomField = () => toField(c.getRandomValues(new Uint8Array(32)));
 
 export class Tree {
-  constructor(leaves) {
+  constructor(leaves, depth = DEPTH) {
     this.leaves = leaves.map(BigInt);
+    this.depth = depth;
     this.memo = new Map();
     this.z = [0n];
-    for (let i = 0; i < DEPTH; i++) this.z.push(H(this.z[i], this.z[i]));
+    for (let i = 0; i < depth; i++) this.z.push(H(this.z[i], this.z[i]));
   }
   node(level, index) {
     if (level === 0) return index < this.leaves.length ? this.leaves[index] : 0n;
@@ -58,11 +60,37 @@ export class Tree {
     if (!this.memo.has(k)) this.memo.set(k, H(this.node(level - 1, 2 * index), this.node(level - 1, 2 * index + 1)));
     return this.memo.get(k);
   }
-  root() { return this.node(DEPTH, 0); }
+  root() { return this.node(this.depth, 0); }
   path(index, fromLevel = 0) {
     const sib = []; let i = index >> fromLevel;
-    for (let level = fromLevel; level < DEPTH; level++) { sib.push(this.node(level, i ^ 1)); i >>= 1; }
+    for (let level = fromLevel; level < this.depth; level++) { sib.push(this.node(level, i ^ 1)); i >>= 1; }
     return sib;
+  }
+}
+
+/** Aztec's indexed Merkle tree of nullifiers (as client/privacy.py's IndexedTree): leaf i =
+ *  [value, next_index, next_value], a linked list sorted by value; leaf 0 is the zero leaf. */
+export class IndexedTree {
+  constructor(nullifiers = []) { this.leaves = [[0n, 0n, 0n]]; for (const nf of nullifiers) this.insert(BigInt(nf)); }
+  low(nf) {
+    let best = 0;
+    this.leaves.forEach(([v], i) => { if (v < nf && v >= this.leaves[best][0]) best = i; });
+    const [v, , nv] = this.leaves[best];
+    if (v === nf || (nv !== 0n && !(nf < nv))) throw new Error("that nullifier is already in the tree");
+    return best;
+  }
+  tree() { return new Tree(this.leaves.map(([v, ni, nv]) => H(v, ni, nv)), NULL_DEPTH); }
+  root() { return this.tree().root(); }
+  /** Insert nf; returns the circuit's witness: the low leaf, its path, the new slot's path. */
+  insert(nf) {
+    const lo = this.low(nf);
+    const [v, ni, nv] = this.leaves[lo];
+    const low = { value: v.toString(), next_index: ni.toString(), next_value: nv.toString(), index: String(lo), path: this.tree().path(lo).map(String) };
+    const fresh = BigInt(this.leaves.length);
+    this.leaves[lo] = [v, fresh, nf];
+    const slot = this.tree().path(Number(fresh)).map(String);
+    this.leaves.push([nf, ni, nv]);
+    return { low, slot };
   }
 }
 
@@ -82,15 +110,28 @@ export async function transferInputs({ id, chain, ins, outs, unshield = 0n, rece
     ...await NC.seal(outs[0].encPub, NC.notePlaintext(outs[0].value, outs[0].blinding)),
     ...await NC.seal(outs[1].encPub, NC.notePlaintext(outs[1].value, outs[1].blinding)),
   ]);
-  const inNote = (n) => n === null
-    ? { owner_sk: id.sk.toString(), value: "0", blinding: randomField().toString(), kind: "0", index: "0", path: Array(DEPTH).fill("0") }
+  // every nullifier is known before proving: the circuit inserts both into the indexed tree
+  const dummy = ins.map((n) => (n === null ? randomField() : null));
+  const nfs = ins.map((n, j) => {
+    if (n === null) return nullifier(noteHash(id.pk, 0n, dummy[j]), id.sk);
+    const nh = noteHash(id.pk, BigInt(n.value), BigInt(n.blinding));
+    return n.kind === "deposit" ? nh : nullifier(nh, id.sk);
+  });
+  const itree = new IndexedTree((chain.nullifiers || []).map((x) => BigInt("0x" + x)));
+  const oldNullRoot = itree.root(), nullSize = itree.leaves.length;
+  const wit = nfs.map((nf) => itree.insert(nf));
+  const inNote = (n, j) => n === null
+    ? { owner_sk: id.sk.toString(), value: "0", blinding: dummy[j].toString(), kind: "0", index: "0", path: Array(DEPTH).fill("0") }
     : { owner_sk: id.sk.toString(), value: BigInt(n.value).toString(), blinding: BigInt(n.blinding).toString(),
         kind: n.kind === "deposit" ? "2" : "1", index: String(n.leaf ?? 0),
         path: (n.kind === "deposit" ? Array(DEPTH).fill(0n) : tree.path(n.leaf)).map(String) };
   const inputs = {
     old_note_root: tree.root().toString(),
-    old_null_root: BigInt(chain.nullRoot || 0).toString(),
+    old_null_root: oldNullRoot.toString(),
     logs_hash: logsHash(logs).toString(),
+    old_null_size: String(nullSize),
+    lows: wit.map((w) => w.low),
+    null_slot_paths: wit.map((w) => w.slot),
     insert_index1: String(insert / 2),
     insert_path: tree.path(insert, 1).map(String),
     unshield_amount: BigInt(unshield).toString(),
@@ -109,8 +150,8 @@ export function payload(publicInputs, proof, logs) {
   return new Uint8Array([...u16(pubs.length), ...pubs, ...u16(proof.length), ...proof, ...logs]);
 }
 
-/** The public inputs as numbers: [old root, old null root, logs hash, new root, new null root,
- *  nf0, nf1, nh0, nh1, unshield amount, receiver, dest, deposit]. */
+/** The public inputs as numbers: [old root, old null root, logs hash, old null size, new root,
+ *  new null root, nf0, nf1, nh0, nh1, unshield amount, receiver, dest, deposit]. */
 export const fields = (publicInputs) => publicInputs.map((x) => BigInt(x));
 
 /** Notes on chain sealed to this identity that hash to their leaf: { leaf, value, blinding, hash }. */

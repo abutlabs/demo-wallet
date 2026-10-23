@@ -110,10 +110,10 @@ async function prove(inputs, steps) {
 /** Prove a transfer of `ins` into `outs` (+ an unshield), submit it, wait for its root. */
 async function transfer(label, ins, outs, extra, steps) {
   await refreshChain();
-  const { inputs, logs } = await W.transferInputs({ id, chain: { leaves: chain.leaves, nullRoot: BigInt("0x" + (chain.null_root || "0")) }, ins, outs, ...extra });
+  const { inputs, logs } = await W.transferInputs({ id, chain: { leaves: chain.leaves, nullifiers: chain.nullifiers || [] }, ins, outs, ...extra });
   const { proof, publicInputs } = await prove(inputs, steps);
   const f = W.fields(publicInputs);
-  const root = W.hex32(f[3]);
+  const root = W.hex32(f[4]);
   await submitUntil(chain.privacy_id, W.payload(publicInputs, proof, logs),
     async () => (await get("/state")).note_root === root, label, steps);
   for (const n of ins.filter(Boolean)) {
