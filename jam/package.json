@@ -6,5 +6,11 @@
   "dependencies": {
     "@aztec/bb.js": "5.0.0",
     "@noir-lang/noir_js": "1.0.0-rc.5"
+  },
+  "scripts": {
+    "build": "esbuild src/provers.js --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/provers.js --log-level=warning && esbuild node_modules/@aztec/bb.js/dest/browser/barretenberg_wasm/barretenberg_wasm_main/factory/browser/main.worker.js --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/main.worker.js --log-level=warning && esbuild node_modules/@aztec/bb.js/dest/browser/barretenberg_wasm/barretenberg_wasm_thread/factory/browser/thread.worker.js --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/thread.worker.js --log-level=warning && cp node_modules/@noir-lang/acvm_js/web/acvm_js_bg.wasm node_modules/@noir-lang/noirc_abi/web/noirc_abi_wasm_bg.wasm dist/"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
   }
 }

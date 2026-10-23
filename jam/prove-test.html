@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Prove Test</title>
+<pre id="out">running…</pre>
+<script type="module">
+  const out = document.getElementById("out");
+  const log = (s) => { out.textContent += "\n" + s; console.log(s); };
+  try {
+    const { Noir, Barretenberg, UltraHonkBackend } = await import("./dist/provers.js");
+    const circuit = await (await fetch("./test-fixtures/transfer.json")).json();
+    const inputs = await (await fetch("./test-fixtures/inputs.json")).json();
+    let t = performance.now();
+    const { witness } = await new Noir(circuit).execute(inputs);
+    log(`witness ${witness.length} bytes in ${(performance.now() - t).toFixed(0)} ms`);
+    const api = await Barretenberg.new({ threads: navigator.hardwareConcurrency || 1 });
+    t = performance.now();
+    const { proof, publicInputs } = await new UltraHonkBackend(circuit.bytecode, api).generateProof(witness, { verifierTarget: "evm" });
+    log(`proof ${proof.length} bytes, ${publicInputs.length} public inputs, in ${(performance.now() - t).toFixed(0)} ms (crossOriginIsolated ${crossOriginIsolated})`);
+    document.title = "PROVED";
+  } catch (e) { log("ERROR " + (e.stack || e)); document.title = "FAILED"; }
+</script>
