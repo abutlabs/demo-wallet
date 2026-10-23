@@ -1,0 +1,74 @@
+/* The demo-wallet's palette (shared/src/ui/styles.ts: primary #715ec2, secondary #e98fff). */
+:root {
+  --primary: #715ec2; --secondary: #e98fff;
+  --bg: #f7f6fb; --surface: #ffffff; --text: #1d1a2b; --muted: #6b6680; --line: #e4e1ee;
+  --ok: #1f7a4d; --err: #b3261e; --work: #715ec2;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14121c; --surface: #1d1a28; --text: #ece9f6; --muted: #a49fb8; --line: #2e2a3d;
+    --ok: #6fd3a0; --err: #ff8a80; --work: #b6a8ff;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14121c; --surface: #1d1a28; --text: #ece9f6; --muted: #a49fb8; --line: #2e2a3d;
+  --ok: #6fd3a0; --err: #ff8a80; --work: #b6a8ff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.bar {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  padding: 0.75rem 1rem; background: var(--primary); color: #fff;
+}
+.brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; letter-spacing: 0.01em; }
+.logo { width: 1.4rem; height: 1.4rem; border-radius: 50%; background: linear-gradient(135deg, #fff 0 45%, var(--secondary) 45%); }
+.who { display: flex; align-items: center; gap: 0.5rem; }
+.who label { font-size: 0.85rem; opacity: 0.9; }
+main { max-width: 46rem; margin: 0 auto; padding: 1rem; display: grid; gap: 1rem; }
+h2 { font-size: 1rem; margin: 0 0 0.35rem; }
+.balances { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.card, .action, .notes, .chain, .status-wrap {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1rem;
+}
+.card .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.card .amount { font-size: 2.2rem; font-weight: 650; margin: 0.2rem 0; font-variant-numeric: tabular-nums; }
+.card .sub { font-size: 0.8rem; color: var(--muted); }
+.card.private { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.action p { margin: 0 0 0.7rem; color: var(--muted); font-size: 0.85rem; min-height: 2.4em; }
+.row { display: flex; gap: 0.5rem; }
+input, select {
+  font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: 0.45rem 0.6rem; min-width: 0;
+}
+.row input { width: 6rem; }
+.bar select { background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.4); }
+.bar select option { color: #1d1a2b; }
+button {
+  font: inherit; font-weight: 600; color: #fff; background: var(--primary); border: 0;
+  border-radius: 8px; padding: 0.5rem 0.9rem; cursor: pointer;
+}
+button:hover:not(:disabled) { filter: brightness(1.08); }
+button:disabled { opacity: 0.45; cursor: progress; }
+.status { font-weight: 600; }
+.status.idle { color: var(--muted); }
+.status.working { color: var(--work); }
+.status.done { color: var(--ok); }
+.status.error { color: var(--err); }
+.steps { margin: 0.5rem 0 0; padding-left: 1.2rem; color: var(--muted); font-size: 0.85rem; }
+.steps:empty { display: none; }
+.notes ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.notes li { display: flex; justify-content: space-between; font-size: 0.9rem; border-bottom: 1px dashed var(--line); padding-bottom: 0.3rem; }
+.notes li:last-child { border-bottom: 0; }
+.chip { font-size: 0.7rem; font-weight: 600; color: var(--primary); background: color-mix(in srgb, var(--secondary) 22%, transparent); border-radius: 999px; padding: 0.15rem 0.5rem; margin-left: 0.4rem; vertical-align: middle; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.3rem 1rem; margin: 0; font-size: 0.85rem; }
+dt { color: var(--muted); }
+dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; }
+@media (max-width: 560px) {
+  .balances, .actions { grid-template-columns: 1fr; }
+  .card .amount { font-size: 1.8rem; }
+}

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JAM Privacy Wallet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="brand"><span class="logo" aria-hidden="true"></span>JAM privacy wallet</div>
+    <div class="who">
+      <label for="user">Account</label>
+      <select id="user"><option>A</option><option>B</option><option>C</option></select>
+    </div>
+  </header>
+
+  <main>
+    <section class="balances" aria-label="Balances">
+      <div class="card">
+        <div class="label">Public</div>
+        <div class="amount" id="public">–</div>
+        <div class="sub">on the public-balance service</div>
+      </div>
+      <div class="card private">
+        <div class="label">Private</div>
+        <div class="amount" id="private">–</div>
+        <div class="sub" id="notes-count">in notes only you can open</div>
+      </div>
+    </section>
+
+    <section class="actions" aria-label="Actions">
+      <div class="action">
+        <h2>Faucet</h2>
+        <p>Dev chain only: mint public balance.</p>
+        <button id="btn-mint" data-action="mint">Mint 100</button>
+      </div>
+      <div class="action">
+        <h2>Shield</h2>
+        <p>Public to private: a deferred transfer carries the note commitment.</p>
+        <div class="row"><input id="amt-shield" type="number" min="1" value="100" aria-label="Amount to shield">
+        <button id="btn-shield" data-action="shield">Shield</button></div>
+      </div>
+      <div class="action">
+        <h2>Send</h2>
+        <p>Private to private: a zero-knowledge proof, verified in refine.</p>
+        <div class="row"><input id="amt-send" type="number" min="1" value="40" aria-label="Amount to send">
+        <select id="to-send" aria-label="Recipient"><option>B</option><option>A</option><option>C</option></select>
+        <button id="btn-send" data-action="send">Send</button></div>
+      </div>
+      <div class="action">
+        <h2>Unshield</h2>
+        <p>Private to public: the proof names the account, accumulate pays it.</p>
+        <div class="row"><input id="amt-unshield" type="number" min="1" value="40" aria-label="Amount to unshield">
+        <button id="btn-unshield" data-action="unshield">Unshield</button></div>
+      </div>
+    </section>
+
+    <section class="status-wrap" aria-live="polite">
+      <div id="status" class="status idle">idle</div>
+      <ol id="steps" class="steps"></ol>
+    </section>
+
+    <section class="notes" aria-label="Your notes">
+      <h2>Your notes</h2>
+      <ul id="notes"></ul>
+    </section>
+
+    <section class="chain" aria-label="Chain">
+      <h2>Chain <span class="chip" id="chain-net">JAM tiny · lasair6</span></h2>
+      <dl>
+        <dt>Slot</dt><dd id="c-slot">–</dd>
+        <dt>Note root</dt><dd id="c-root" class="mono">–</dd>
+        <dt>Leaves</dt><dd id="c-leaves">–</dd>
+        <dt>Transfers</dt><dd id="c-transfers">–</dd>
+        <dt>Shielded / unshielded</dt><dd id="c-flow">–</dd>
+        <dt>Services</dt><dd id="c-services">–</dd>
+      </dl>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
