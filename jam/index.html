@@ -9,13 +9,16 @@
 <body>
   <header class="bar">
     <div class="brand"><span class="logo" aria-hidden="true"></span>JAM privacy wallet</div>
-    <div class="who">
-      <label for="user">Account</label>
-      <select id="user"><option>A</option><option>B</option><option>C</option></select>
-    </div>
+    <div class="who"><span id="wallet-name">wallet</span></div>
   </header>
 
   <main>
+    <section class="card address" aria-label="Your address">
+      <div class="label">Your address <span class="hint">give it to whoever pays you</span></div>
+      <div class="row"><code id="address" class="mono">…</code><button id="btn-copy" class="small" type="button">Copy</button></div>
+      <div class="sub" id="key-status">keys stay in this browser</div>
+    </section>
+
     <section class="balances" aria-label="Balances">
       <div class="card">
         <div class="label">Public</div>
@@ -43,9 +46,9 @@
       </div>
       <div class="action">
         <h2>Send</h2>
-        <p>Private to private: a zero-knowledge proof, verified in refine.</p>
+        <p>Private to private: proved in this browser, verified in refine.</p>
+        <div class="row"><input id="to-send" type="text" placeholder="recipient address" aria-label="Recipient address" spellcheck="false"></div>
         <div class="row"><input id="amt-send" type="number" min="1" value="40" aria-label="Amount to send">
-        <select id="to-send" aria-label="Recipient"><option>B</option><option>A</option><option>C</option></select>
         <button id="btn-send" data-action="send">Send</button></div>
       </div>
       <div class="action">
@@ -78,6 +81,6 @@
       </dl>
     </section>
   </main>
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

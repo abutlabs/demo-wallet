@@ -72,3 +72,9 @@ dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   .balances, .actions { grid-template-columns: 1fr; }
   .card .amount { font-size: 1.8rem; }
 }
+.address .row { align-items: center; }
+.address code { flex: 1; overflow-wrap: anywhere; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.4rem 0.6rem; }
+.hint { text-transform: none; letter-spacing: 0; margin-left: 0.4rem; font-size: 0.75rem; }
+button.small { padding: 0.35rem 0.7rem; font-size: 0.85rem; }
+.action .row + .row { margin-top: 0.5rem; }
+.action input[type=text] { width: 100%; }
