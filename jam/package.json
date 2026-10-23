@@ -1,0 +1,10 @@
+{
+  "name": "jam-privacy-wallet",
+  "private": true,
+  "type": "module",
+  "description": "The JAM privacy wallet page: proves in the browser with noir_js and bb.js; keys stay in the browser",
+  "dependencies": {
+    "@aztec/bb.js": "5.0.0",
+    "@noir-lang/noir_js": "1.0.0-rc.5"
+  }
+}
