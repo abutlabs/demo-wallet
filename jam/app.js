@@ -171,7 +171,8 @@ async function render() {
   $("public").textContent = (await publicBalance()).toString();
   $("private").textContent = privateBalance().toString();
   const notes = unspent();
-  $("notes-count").textContent = notes.length === 1 ? "in 1 note only you can open" : `in ${notes.length} notes only you can open`;
+  $("notes-count").textContent = notes.length === 0 ? "shield some to start; only you can open your notes"
+    : notes.length === 1 ? "in 1 note only you can open" : `in ${notes.length} notes only you can open`;
   $("notes").replaceChildren(...(notes.length ? notes.map((n) => {
     const li = document.createElement("li");
     li.append(Object.assign(document.createElement("span"), { textContent: `note at leaf ${n.leaf}` }),
