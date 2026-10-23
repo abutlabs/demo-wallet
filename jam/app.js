@@ -29,6 +29,7 @@ function render(st) {
   }) : [Object.assign(document.createElement("li"), { textContent: "no private notes yet" })]));
   const c = st.chain || {};
   $("c-slot").textContent = c.slot ?? "–";
+  if (c.net) $("chain-net").textContent = `JAM tiny · ${c.net}`;
   $("c-root").textContent = c.note_root ? "0x" + c.note_root : "(empty tree)";
   $("c-leaves").textContent = c.leaf_count ?? "–";
   $("c-transfers").textContent = c.transfers ?? "–";
