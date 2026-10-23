@@ -10,8 +10,8 @@ import { blake2b } from "./blake2b.js";
 import * as NC from "./notecrypt.js";
 
 export const P = P2.P;
-export const DEPTH = 16;        // the note tree
-export const NULL_DEPTH = 16;   // the indexed nullifier tree
+export const DEPTH = 40;        // the note tree (Aztec: 40)
+export const NULL_DEPTH = 40;   // the indexed nullifier tree (Aztec: 40)
 const c = globalThis.crypto;
 const enc = new TextEncoder();
 export const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
