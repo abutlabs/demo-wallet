@@ -60,6 +60,7 @@ async function act(action) {
   document.querySelectorAll("button").forEach((b) => (b.disabled = true));
   $("steps").replaceChildren();
   const t0 = Date.now();
+  setStatus("working", `working: ${action} · 0 s`);
   const tick = setInterval(() => setStatus("working", `working: ${action} · ${Math.round((Date.now() - t0) / 1000)} s`), 500);
   try {
     const r = await fetch(`/api/${action}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
