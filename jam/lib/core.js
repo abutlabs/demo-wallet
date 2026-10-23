@@ -66,32 +66,60 @@ export class Tree {
     for (let level = fromLevel; level < this.depth; level++) { sib.push(this.node(level, i ^ 1)); i >>= 1; }
     return sib;
   }
+  /** Write leaf `index` (or append it at the end); only its ancestors are rehashed. */
+  set(index, leaf) {
+    this.leaves[index] = BigInt(leaf);
+    for (let level = 1; level <= this.depth; level++) this.memo.delete(level * 1e9 + Math.floor(index / 2 ** level));
+  }
 }
 
 /** Aztec's indexed Merkle tree of nullifiers (as client/privacy.py's IndexedTree): leaf i =
- *  [value, next_index, next_value], a linked list sorted by value; leaf 0 is the zero leaf. */
+ *  [value, next_index, next_value], a linked list sorted by value; leaf 0 is the zero leaf. The
+ *  list is linked first and hashed once; each insert then rehashes only its two leaves' paths. */
 export class IndexedTree {
-  constructor(nullifiers = []) { this.leaves = [[0n, 0n, 0n]]; for (const nf of nullifiers) this.insert(BigInt(nf)); }
+  constructor(nullifiers = []) {
+    this.leaves = [[0n, 0n, 0n]];
+    this.values = [0n];                    // every leaf's value, ascending
+    this.at = new Map([[0n, 0]]);          // value -> leaf index
+    this._tree = null;
+    for (const nf of nullifiers) this._link(BigInt(nf), false);
+  }
+  /** The position of the first value >= nf. */
+  rank(nf) {
+    let lo = 0, hi = this.values.length;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (this.values[m] < nf) lo = m + 1; else hi = m; }
+    return lo;
+  }
   low(nf) {
-    let best = 0;
-    this.leaves.forEach(([v], i) => { if (v < nf && v >= this.leaves[best][0]) best = i; });
+    const r = this.rank(nf);
+    const best = r ? this.at.get(this.values[r - 1]) : 0;
     const [v, , nv] = this.leaves[best];
     if (v === nf || (nv !== 0n && !(nf < nv))) throw new Error("that nullifier is already in the tree");
     return best;
   }
-  tree() { return new Tree(this.leaves.map(([v, ni, nv]) => H(v, ni, nv)), NULL_DEPTH); }
+  tree() {
+    if (!this._tree) this._tree = new Tree(this.leaves.map(([v, ni, nv]) => H(v, ni, nv)), NULL_DEPTH);
+    return this._tree;
+  }
   root() { return this.tree().root(); }
-  /** Insert nf; returns the circuit's witness: the low leaf, its path, the new slot's path. */
-  insert(nf) {
+  _set(index, leaf) {
+    this.leaves[index] = leaf;
+    if (this._tree) this._tree.set(index, H(...leaf));
+  }
+  _link(nf, witness) {
     const lo = this.low(nf);
     const [v, ni, nv] = this.leaves[lo];
-    const low = { value: v.toString(), next_index: ni.toString(), next_value: nv.toString(), index: String(lo), path: this.tree().path(lo).map(String) };
-    const fresh = BigInt(this.leaves.length);
-    this.leaves[lo] = [v, fresh, nf];
-    const slot = this.tree().path(Number(fresh)).map(String);
-    this.leaves.push([nf, ni, nv]);
+    const low = witness && { value: v.toString(), next_index: ni.toString(), next_value: nv.toString(), index: String(lo), path: this.tree().path(lo).map(String) };
+    const fresh = this.leaves.length;
+    this._set(lo, [v, BigInt(fresh), nf]);
+    const slot = witness && this.tree().path(fresh).map(String);
+    this._set(fresh, [nf, ni, nv]);
+    this.values.splice(this.rank(nf), 0, nf);
+    this.at.set(nf, fresh);
     return { low, slot };
   }
+  /** Insert nf; returns the circuit's witness: the low leaf, its path, the new slot's path. */
+  insert(nf) { return this._link(nf, true); }
 }
 
 /** blake2b-256 of the sealed notes, first byte zeroed: the logs_hash public input. */
