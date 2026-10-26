@@ -63,10 +63,15 @@ export const u64le = (n) => { const b = new Uint8Array(8); let x = BigInt(n); fo
 export const u32le = (n) => Uint8Array.from([n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >>> 24) & 255]);
 const cat = (...xs) => { const out = new Uint8Array(xs.reduce((s, x) => s + x.length, 0)); let o = 0; for (const x of xs) { out.set(x, o); o += x.length; } return out; };
 const nonce = () => c.getRandomValues(new Uint8Array(32));
-export const opMint = (account, amount) => cat([0], unhex(account), u64le(amount), nonce());
+/** A mint: a fresh random nonce, or [n] (32 bytes) to make two builders' mints one operation. */
+export const opMint = (account, amount, n = nonce()) => cat([0], unhex(account), u64le(amount), n);
 export const opShield = (account, amount, dest, commitment) => cat([2], unhex(account), u64le(amount), u32le(dest), unhex(commitment));
 export const opKey = (account, entry) => cat([3], unhex(account), unhex(entry));
 export const opTransfer = (from, to, amount) => cat([4], unhex(from), u64le(amount), nonce(), unhex(to));
+/** The nonce of a mint, burn or public transfer (bytes 41..73): the service applies each nonce
+ *  once and records it (`seen:<nonce>`, the indexer's /seen), so it says whether the operation
+ *  landed whatever else moved the balance meanwhile. */
+export const nonceOf = (payload) => hex(payload.slice(41, 73));
 
 /** The directory entry others pay this identity by: encryption key || spend public key. */
 export const directoryEntry = (id) => hex(id.enc.pub) + hex32(id.pk);

@@ -162,17 +162,19 @@ const self = (value) => ({ pk: id.pk, encPub: id.enc.pub, value: BigInt(value), 
 
 // ---- the moves ----------------------------------------------------------------------------
 const ACTIONS = {
+  // a mint or payment has landed when the service has applied its nonce: judged by the balance,
+  // a payment arriving at the same moment would hide the change and the page would resend forever
   async mint(amount, steps) {
-    const before = await publicBalance();
-    await submitUntil(chain.public_id, W.opMint(id.account, amount), async () => (await publicBalance()) === before + BigInt(amount), "mint", steps);
+    const p = W.opMint(id.account, amount);
+    await submitUntil(chain.public_id, p, async () => (await get(`/seen/${W.nonceOf(p)}`)).seen, "mint", steps);
   },
   async pay(amount, steps, to) {
     to = recipient(to);
     if (to === id.account) throw new Error("that is your own address");
     const before = await publicBalance();
     if (before < BigInt(amount)) throw new Error(`you hold ${before} publicly, not ${amount}`);
-    await submitUntil(chain.public_id, W.opTransfer(id.account, to, amount),
-      async () => (await publicBalance()) === before - BigInt(amount), "pay", steps);
+    const p = W.opTransfer(id.account, to, amount);
+    await submitUntil(chain.public_id, p, async () => (await get(`/seen/${W.nonceOf(p)}`)).seen, "pay", steps);
   },
   async shield(amount, steps) {
     const have = await publicBalance();
