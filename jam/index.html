@@ -3,13 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>JAM Privacy Wallet</title>
+  <title>JAM Rebel Wallet</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="bar">
-    <div class="brand"><span class="logo" aria-hidden="true"></span>JAM privacy wallet</div>
-    <div class="who"><span id="wallet-name">wallet</span></div>
+    <div class="brand"><span class="logo" aria-hidden="true"></span>JAM Rebel Wallet</div>
+    <nav class="who">
+      <label for="who">Account</label><select id="who" aria-label="Account"></select>
+      <a class="bar-link" href="explorer.html" target="_blank">Explorer</a>
+    </nav>
   </header>
 
   <main>
@@ -17,13 +20,14 @@
       <div class="label">Your address <span class="hint">give it to whoever pays you</span></div>
       <div class="row"><code id="address" class="mono">…</code><button id="btn-copy" class="small" type="button">Copy</button></div>
       <div class="sub" id="key-status">keys stay in this browser</div>
+      <div class="sub" id="key-kind"></div>
     </section>
 
     <section class="balances" aria-label="Balances">
       <div class="card">
         <div class="label">Public</div>
         <div class="amount" id="public">–</div>
-        <div class="sub">on the public-balance service</div>
+        <div class="sub">on the public-balance service: anyone can read it</div>
       </div>
       <div class="card private">
         <div class="label">Private</div>
@@ -32,30 +36,49 @@
       </div>
     </section>
 
+    <datalist id="known"></datalist>
     <section class="actions" aria-label="Actions">
       <div class="action">
         <h2>Faucet</h2>
         <p>Dev chain only: mint public balance.</p>
+        <p class="seen"><b>The Empire sees</b> your address and the amount.</p>
         <button id="btn-mint" data-action="mint">Mint 100</button>
+      </div>
+      <div class="action">
+        <h2>Pay publicly</h2>
+        <p>Public to public, on the public-balance service.</p>
+        <p class="seen"><b>The Empire sees</b> your address, the recipient's address and the amount.</p>
+        <div class="row"><input id="to-pay" class="to" type="text" list="known" placeholder="address, or bob, carol …" aria-label="Recipient of a public payment" spellcheck="false"></div>
+        <div class="row"><input id="amt-pay" type="number" min="1" value="25" aria-label="Amount to pay publicly">
+        <button id="btn-pay" data-action="pay">Pay</button></div>
       </div>
       <div class="action">
         <h2>Shield</h2>
         <p>Public to private: a deferred transfer carries the note commitment.</p>
+        <p class="seen"><b>The Empire sees</b> your address, the amount and a note commitment. Not who will own the note.</p>
         <div class="row"><input id="amt-shield" type="number" min="1" value="100" aria-label="Amount to shield">
         <button id="btn-shield" data-action="shield">Shield</button></div>
       </div>
       <div class="action">
-        <h2>Send</h2>
+        <h2>Send privately</h2>
         <p>Private to private: proved in this browser, verified in refine.</p>
-        <div class="row"><input id="to-send" type="text" placeholder="recipient address" aria-label="Recipient address" spellcheck="false"></div>
+        <p class="seen"><b>The Empire sees</b> two nullifiers, two note commitments and two sealed notes. Not you, not the recipient, not the amount.</p>
+        <div class="row"><input id="to-send" class="to" type="text" list="known" placeholder="address, or bob, carol …" aria-label="Recipient address" spellcheck="false"></div>
         <div class="row"><input id="amt-send" type="number" min="1" value="40" aria-label="Amount to send">
         <button id="btn-send" data-action="send">Send</button></div>
       </div>
       <div class="action">
         <h2>Unshield</h2>
         <p>Private to public: the proof names the account, accumulate pays it.</p>
+        <p class="seen"><b>The Empire sees</b> the amount and your address. Not which notes paid for it.</p>
         <div class="row"><input id="amt-unshield" type="number" min="1" value="40" aria-label="Amount to unshield">
         <button id="btn-unshield" data-action="unshield">Unshield</button></div>
+      </div>
+      <div class="action">
+        <h2>Viewing key</h2>
+        <p>Opens the notes sealed to you. It cannot spend them.</p>
+        <div class="row"><code id="viewing-key" class="mono vk">…</code><button id="btn-copy-vk" class="small" type="button">Copy</button></div>
+        <p class="links"><a id="link-explorer" target="_blank">Your address in the explorer</a> · <a id="link-explorer-vk" target="_blank">and with your viewing key</a></p>
       </div>
     </section>
 
@@ -70,7 +93,7 @@
     </section>
 
     <section class="chain" aria-label="Chain">
-      <h2>Chain <span class="chip" id="chain-net">JAM tiny · lasair6</span></h2>
+      <h2>Chain <span class="chip" id="chain-net">JAM tiny</span></h2>
       <dl>
         <dt>Slot</dt><dd id="c-slot">–</dd>
         <dt>Note root</dt><dd id="c-root" class="mono">–</dd>

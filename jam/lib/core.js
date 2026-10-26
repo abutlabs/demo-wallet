@@ -30,12 +30,43 @@ export async function init() { await P2.load(); }
 /** Everything the wallet derives from its secret. */
 export async function identity(secret) {
   const sk = toField(await sha256("jam-privacy-spend:", secret));
-  const encPriv = await sha256("jam-privacy-enc-key", secret);
-  const ek = await NC.keyPair(encPriv);
+  const encSecret = await sha256("jam-privacy-enc-key", secret);
+  const ek = await NC.keyPair(encSecret);
   const acct = await sha256("jam-privacy-account:", secret);
   acct[0] = 0;                                   // a field element, as the circuit needs it
-  return { sk, pk: H(sk), enc: ek, account: hex(acct) };
+  return { sk, pk: H(sk), enc: ek, encSecret, account: hex(acct) };
 }
+
+/** The standard JAM dev accounts (JIP-5), by index. Their secrets are public: anyone can open
+ *  Alice's wallet, so they are for demos on a dev chain, where everyone knows who is who. */
+export const DEV_ACCOUNTS = ["Alice", "Bob", "Carol", "David", "Eve", "Fergie"];
+/** A dev account's secret: its JIP-5 seed, the index as u32 LE repeated eight times. */
+export function devSecret(i) {
+  const b = new Uint8Array(32);
+  for (let k = 0; k < 8; k++) b.set([i & 255, (i >> 8) & 255, (i >> 16) & 255, (i >>> 24) & 255], 4 * k);
+  return b;
+}
+export const devIndex = (name) => DEV_ACCOUNTS.findIndex((n) => n.toLowerCase() === String(name).toLowerCase());
+
+/** A viewing key: the note-encryption secret and the spend public key, 64 bytes. It opens the
+ *  notes sealed to this identity and checks they hash to their leaves; it cannot spend them, and
+ *  it cannot tell which are spent (a nullifier needs the spend key). */
+export const viewingKey = (id) => hex(id.encSecret) + hex32(id.pk);
+export async function viewer(vk) {
+  const h = vk.replace(/^0x/, "").toLowerCase();
+  if (!/^[0-9a-f]{128}$/.test(h)) throw new Error("a viewing key is 128 hex characters");
+  return { enc: await NC.keyPair(unhex(h.slice(0, 64))), pk: BigInt("0x" + h.slice(64)) };
+}
+
+// ---- the public-balance service's operations (services/public-balance) --------------------
+export const u64le = (n) => { const b = new Uint8Array(8); let x = BigInt(n); for (let i = 0; i < 8; i++) { b[i] = Number(x & 255n); x >>= 8n; } return b; };
+export const u32le = (n) => Uint8Array.from([n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >>> 24) & 255]);
+const cat = (...xs) => { const out = new Uint8Array(xs.reduce((s, x) => s + x.length, 0)); let o = 0; for (const x of xs) { out.set(x, o); o += x.length; } return out; };
+const nonce = () => c.getRandomValues(new Uint8Array(32));
+export const opMint = (account, amount) => cat([0], unhex(account), u64le(amount), nonce());
+export const opShield = (account, amount, dest, commitment) => cat([2], unhex(account), u64le(amount), u32le(dest), unhex(commitment));
+export const opKey = (account, entry) => cat([3], unhex(account), unhex(entry));
+export const opTransfer = (from, to, amount) => cat([4], unhex(from), u64le(amount), nonce(), unhex(to));
 
 /** The directory entry others pay this identity by: encryption key || spend public key. */
 export const directoryEntry = (id) => hex(id.enc.pub) + hex32(id.pk);

@@ -1,0 +1,51 @@
+/* The explorer, on the wallet's palette (style.css). Public is the plain surface; private is the
+   wallet's purple, and what a key reveals is the secondary pink. */
+body.explorer main { max-width: 60rem; }
+.chip.on-bar { color: #fff; background: rgba(255,255,255,0.18); }
+.bar-slot { font-size: 0.85rem; opacity: 0.9; font-variant-numeric: tabular-nums; }
+.intro p { margin: 0; font-size: 0.92rem; line-height: 1.5; }
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.field label { display: block; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.35rem; }
+.field .row { align-items: center; flex-wrap: wrap; }
+.field input[type=text] { flex: 1; min-width: 10rem; }
+.field select { flex: 1; }
+.vk-row { margin-top: 0.5rem; }
+.key-note { font-size: 0.8rem; color: var(--muted); margin: 0.5rem 0 0; }
+button.ghost { background: transparent; color: var(--primary); border: 1px solid var(--line); }
+.summary .sum-h { font-weight: 650; margin-bottom: 0.3rem; }
+.hex.full { display: block; overflow-wrap: anywhere; font-size: 0.75rem; margin-bottom: 0.8rem; }
+.sum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.stat { border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem 0.9rem; }
+.stat.priv { border-color: var(--primary); }
+.stat .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.stat .big { font-size: 1.8rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.stat .sub { font-size: 0.78rem; color: var(--muted); }
+.feed-wrap .sub { color: var(--muted); font-size: 0.85rem; margin: 0 0 0.8rem; }
+.feed { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.item { border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem 0.9rem; display: grid; gap: 0.35rem; font-size: 0.88rem; }
+.item.private { border-color: color-mix(in srgb, var(--primary) 55%, var(--line)); background: color-mix(in srgb, var(--primary) 5%, var(--surface)); }
+.item-h { display: flex; align-items: center; gap: 0.6rem; }
+.item-title { font-weight: 650; flex: 1; }
+.item-slot { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.badge { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-radius: 999px; padding: 0.12rem 0.5rem; }
+.badge.public { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.badge.private { background: var(--primary); color: #fff; }
+.line { line-height: 1.5; }
+.amt { font-variant-numeric: tabular-nums; }
+.who-link { font-weight: 600; text-decoration: none; }
+.who-link:hover { text-decoration: underline; }
+.hex { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.74rem; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 0.05rem 0.35rem; cursor: copy; }
+.io { display: grid; gap: 0.25rem; }
+.io-h { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.io-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
+.link { color: var(--text); }
+.reveal { font-weight: 650; color: var(--text); background: color-mix(in srgb, var(--secondary) 35%, transparent); border-radius: 6px; padding: 0.05rem 0.4rem; }
+.muted { color: var(--muted); font-size: 0.8rem; }
+.foot { font-size: 0.8rem; border-top: 1px dashed var(--line); padding-top: 0.35rem; color: var(--muted); }
+.foot.private { color: var(--primary); }
+.empty { color: var(--muted); }
+#status:empty { display: none; }
+#status { color: var(--err); }
+@media (max-width: 640px) {
+  .controls, .sum-grid { grid-template-columns: 1fr; }
+}

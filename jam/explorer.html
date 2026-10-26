@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Imperial Ledger · JAM explorer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="explorer.css">
+</head>
+<body class="explorer">
+  <header class="bar">
+    <div class="brand"><span class="logo" aria-hidden="true"></span>Imperial Ledger <span class="bar-sub">a JAM explorer</span> <span class="chip on-bar" id="net">JAM tiny</span></div>
+    <nav class="who"><span id="slot" class="bar-slot"></span><a class="bar-link" href="./?user=alice">Wallet</a></nav>
+  </header>
+
+  <main>
+    <section class="card intro">
+      <p>What the Empire sees, and what it cannot. Everything on this page is what the chain records: the two services' storage, which any JAM node serves to anyone over JIP-2.
+      Public payments show who paid whom and how much. Private transfers show only nullifiers, note commitments and sealed notes.
+      A key decides what you can read inside them.</p>
+    </section>
+
+    <section class="card controls" aria-label="Search">
+      <div class="field">
+        <label for="q">Address</label>
+        <div class="row"><input id="q" type="text" list="known" placeholder="an address, or alice, bob …" spellcheck="false" aria-label="Address">
+        <button id="btn-q" type="button">Show</button><button id="btn-all" type="button" class="ghost">All activity</button></div>
+      </div>
+      <div class="field">
+        <label for="key">Read with</label>
+        <div class="row"><select id="key" aria-label="Key">
+          <option value="">No key: what the Empire sees</option>
+        </select></div>
+        <div class="row vk-row" id="vk-row" hidden><input id="vk" type="text" placeholder="a viewing key, 128 hex characters (the wallet shows yours)" spellcheck="false" aria-label="Viewing key">
+        <button id="btn-vk" type="button">Open</button></div>
+        <p class="key-note" id="key-note"></p>
+      </div>
+      <datalist id="known"></datalist>
+    </section>
+
+    <section class="card summary" id="summary" hidden aria-live="polite"></section>
+
+    <section class="card feed-wrap" aria-label="Activity">
+      <h2 id="feed-title">All activity</h2>
+      <p class="sub" id="feed-note"></p>
+      <ol id="feed" class="feed"></ol>
+    </section>
+    <p class="status" id="status"></p>
+  </main>
+  <script type="module" src="explorer.js"></script>
+</body>
+</html>

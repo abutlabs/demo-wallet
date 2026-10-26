@@ -1,6 +1,6 @@
-/* The demo-wallet's palette (shared/src/ui/styles.ts: primary #715ec2, secondary #e98fff). */
+/* The demo-wallet's palette (shared/src/ui/styles.ts: primary #715ec2, secondary #e98fff), with a rebel yellow. */
 :root {
-  --primary: #715ec2; --secondary: #e98fff;
+  --primary: #715ec2; --secondary: #e98fff; --rebel: #ffe81f;
   --bg: #f7f6fb; --surface: #ffffff; --text: #1d1a2b; --muted: #6b6680; --line: #e4e1ee;
   --ok: #1f7a4d; --err: #b3261e; --work: #715ec2;
 }
@@ -15,16 +15,28 @@
   --ok: #6fd3a0; --err: #ff8a80; --work: #b6a8ff;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+/* The rebel bar: deep space, a few stars, the crawl's yellow. */
 .bar {
   display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-  padding: 0.75rem 1rem; background: var(--primary); color: #fff;
+  padding: 0.75rem 1rem; color: #fff; border-bottom: 2px solid var(--rebel);
+  background:
+    radial-gradient(1px 1px at 12% 30%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 27% 75%, #fffbe0 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 41% 20%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 65%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 73% 35%, #e9e4ff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 88% 80%, #fff 50%, transparent 51%),
+    linear-gradient(100deg, #05040b 0%, #120d2a 60%, #2b1f5c 100%);
 }
-.brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; letter-spacing: 0.01em; }
-.logo { width: 1.4rem; height: 1.4rem; border-radius: 50%; background: linear-gradient(135deg, #fff 0 45%, var(--secondary) 45%); }
+.brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rebel); }
+.bar-sub { font-weight: 500; letter-spacing: 0.02em; text-transform: none; color: #fff; opacity: 0.75; font-size: 0.85rem; }
+/* a four-pointed star, the rebels' mark */
+.logo { width: 1.4rem; height: 1.4rem; background: var(--rebel); clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); }
 .who { display: flex; align-items: center; gap: 0.5rem; }
 .who label { font-size: 0.85rem; opacity: 0.9; }
 main { max-width: 46rem; margin: 0 auto; padding: 1rem; display: grid; gap: 1rem; }
@@ -78,3 +90,13 @@ dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 button.small { padding: 0.35rem 0.7rem; font-size: 0.85rem; }
 .action .row + .row { margin-top: 0.5rem; }
 .action input[type=text] { width: 100%; }
+/* what the chain shows of each move */
+.action p.seen { color: var(--text); font-size: 0.8rem; min-height: 0; background: var(--bg); border-left: 3px solid var(--secondary); border-radius: 0 6px 6px 0; padding: 0.35rem 0.55rem; }
+.action p.seen b { color: var(--primary); font-weight: 650; }
+.action p.links { min-height: 0; margin: 0.6rem 0 0; }
+a { color: var(--primary); }
+.vk { flex: 1; overflow-wrap: anywhere; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.7rem; }
+.action .row { align-items: center; }
+.bar-link { color: #fff; font-weight: 600; text-decoration: none; border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+.bar-link:hover { background: rgba(255,255,255,0.12); }
+#key-kind:empty { display: none; }
